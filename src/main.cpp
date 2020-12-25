@@ -58,11 +58,11 @@ OneWire oneWire(ONE_WIRE_BUS);
 DS18B20 sensor(&oneWire);
 
 // Uncomment for more debug information
-//#define DEBUG
+#define DEBUG
 
 // Limits for parameters
-#define LOW_TEMP        30.0f
-#define HIGH_TEMP       50.0f
+#define LOW_TEMP        30.5f
+#define HIGH_TEMP       50.5f
 #define LOW_SPLTIME     1
 #define HIGH_SPLTIME    30
 #define LOW_KP          1.0f
@@ -167,9 +167,9 @@ void setup()
   EEPROM.get(0, EEdata);
   if (EEdata.magic != 12345)
   {
-    EEdata.tempSetPoint = 40.0f;
-    EEdata.kp = 15.0f;
-    EEdata.ki = 0.05f;
+    EEdata.tempSetPoint = 40.5f;
+    EEdata.kp = 90.0f;
+    EEdata.ki = 0.10f;
     EEdata.kd = 0.0f;
     EEdata.sampleTimeS = 1;
     EEdata.tempUnitCF = 'C';
@@ -186,13 +186,6 @@ void setup()
 #ifdef DEBUG
   // logging on serial port
   Serial.begin(9600);
-
-  pkp = (int)EEdata.kp;
-  pki = (int)(EEdata.ki * 100);
-  pkd = (int)EEdata.kd;
-  sprintf(string, "setpoint;temp;pwm;P:%d I*100:%d D:%d S:%d", pkp, pki, pkd,
-    EEdata.sampleTimeS);
-  Serial.println(string);
 #endif
 }
 
@@ -207,9 +200,10 @@ void loop()
 #ifdef DEBUG
   if ((millis() % 1000) < 200)
   {
-    // logging on serial port
+    // The format supports Serial Oscilloscope (works great for tuning)
+    // https://x-io.co.uk/serial-oscilloscope/
     tempRead = (int)(tempReading * 10);
-    sprintf(string, "%d;%02d,%1d;%d", (int)EEdata.tempSetPoint,
+    sprintf(string, "%d,%02d.%1d,%d", (int)EEdata.tempSetPoint,
       tempRead / 10, tempRead % 10, (int)heaterControl);
     Serial.println(string);
   }
